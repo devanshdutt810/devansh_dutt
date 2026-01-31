@@ -71,11 +71,9 @@ class App extends StatelessWidget {
             // ),
             SingleChildScrollView(
               controller: _scrollController,
-              padding: EdgeInsets.fromLTRB(
-                R.pad(context),
-                0, // remove top gap so content starts behind browser bar
-                R.pad(context),
-                0,
+              padding: EdgeInsets.symmetric(
+                horizontal: R.pad(context),
+                vertical: R.isMobile(context) ? 60 : 100,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
