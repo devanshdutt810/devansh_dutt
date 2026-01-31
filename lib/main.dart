@@ -1,9 +1,6 @@
-import 'dart:html' as html;
-import 'dart:ui_web' as ui;
-import 'package:flutter/foundation.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:flutter/widgets.dart' as flutter;
 import 'package:flutter/material.dart';
-import 'package:neural_effect/neural_effect.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 // Responsive helper class
@@ -39,30 +36,7 @@ class R {
 }
 
 void main() {
-  if (kIsWeb) {
-    _registerIframes();
-  }
   runApp(const App());
-}
-
-void _registerIframes() {
-  _registerIframe('mentora', 'https://www.mentoraaiapp.com/');
-  _registerIframe('aspyre', 'https://www.aspyre.co.in/');
-  _registerIframe('arzoo', 'https://arzoo-makeovers.vercel.app/');
-  _registerIframe('yk', 'https://www.ykwaterpumps.in/');
-}
-
-void _registerIframe(String id, String url) {
-  ui.platformViewRegistry.registerViewFactory('iframe-$id', (int viewId) {
-    final iframe = html.IFrameElement()
-      ..src = url
-      ..style.border = 'none'
-      ..style.width = '100%'
-      ..style.height = '100%'
-      ..style.pointerEvents = 'none'
-      ..style.backgroundColor = 'black';
-    return iframe;
-  });
 }
 
 class App extends StatelessWidget {
@@ -389,19 +363,6 @@ class App extends StatelessWidget {
   }
 }
 
-class _ProjectIframe extends StatelessWidget {
-  final String viewType;
-  const _ProjectIframe({required this.viewType});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: SizedBox.expand(child: HtmlElementView(viewType: viewType)),
-    );
-  }
-}
-
 class _StatBlock extends StatelessWidget {
   final String value;
   final String label;
@@ -456,7 +417,7 @@ class _SocialIcon extends StatelessWidget {
         onTap: url == null
             ? null
             : () {
-                html.window.open(url!, '_blank');
+                launchUrlString(url!);
               },
         borderRadius: BorderRadius.circular(12),
         child: Container(
@@ -625,161 +586,17 @@ class _RecommendationCard extends StatelessWidget {
   }
 }
 
-class _ProjectsCarousel extends StatefulWidget {
-  @override
-  State<_ProjectsCarousel> createState() => _ProjectsCarouselState();
-}
-
-class _ProjectsCarouselState extends State<_ProjectsCarousel> {
-  final PageController _controller = PageController(viewportFraction: 0.38);
-
-  double _page = 0.0;
-
-  final projects = const [
-    _ProjectData(
-      title: 'Mentora AI',
-      description:
-          'An AI-powered exam preparation mobile application with notes, quizzes, planners, and AI doubt solving.',
-      viewType: 'iframe-mentora',
-      openUrl: 'https://www.mentoraaiapp.com/',
-    ),
-    _ProjectData(
-      title: 'Aspyre',
-      description:
-          'A modern clothing brand focused on strong visual identity, storytelling, and e-commerce.',
-      viewType: 'iframe-aspyre',
-      fallbackImage: 'assets/images/aspyre_preview.png',
-      openUrl: 'https://www.aspyre.co.in/',
-    ),
-    _ProjectData(
-      title: 'Arzoo Makeovers',
-      description:
-          'A clean portfolio website showcasing professional makeup work and services.',
-      viewType: 'iframe-arzoo',
-      openUrl: 'https://arzoo-makeovers.vercel.app/',
-    ),
-    _ProjectData(
-      title: 'YK Industries',
-      description:
-          'A corporate portfolio website for an industrial water pump manufacturer.',
-      viewType: 'iframe-yk',
-      openUrl: 'https://www.ykwaterpumps.in/',
-    ),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _controller.addListener(() {
-      setState(() {
-        _page = _controller.page ?? 0.0;
-      });
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final activeIndex = _page.round().clamp(0, projects.length - 1);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          height: 420,
-          child: PageView.builder(
-            controller: _controller,
-            itemCount: projects.length,
-            itemBuilder: (context, index) {
-              final diff = (_page - index).abs();
-              final scale = (1 - diff * 0.25).clamp(0.8, 1.0);
-
-              return Transform.scale(
-                scale: scale,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: _ProjectCarouselTile(project: projects[index]),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 40),
-        Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: Column(
-              children: [
-                Text(
-                  projects[activeIndex].title,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.archivoBlack(
-                    fontSize: 36,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 28),
-
-                // BIG REDIRECT BUTTON
-                SizedBox(
-                  width: 260,
-                  child: OutlinedButton(
-                    onPressed: projects[activeIndex].openUrl == null
-                        ? null
-                        : () {
-                            html.window.open(
-                              projects[activeIndex].openUrl!,
-                              '_blank',
-                            );
-                          },
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.white),
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                    ),
-                    child: const Text(
-                      'Have a Look',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 18,
-                        letterSpacing: 1.2,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                Text(
-                  projects[activeIndex].description,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    height: 1.7,
-                    color: Colors.white70,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _ProjectData {
   final String title;
   final String description;
-  final String viewType;
-  final String? fallbackImage;
-  final String? openUrl;
+  final String image;
+  final String openUrl;
 
   const _ProjectData({
     required this.title,
     required this.description,
-    required this.viewType,
-    this.fallbackImage,
-    this.openUrl,
+    required this.image,
+    required this.openUrl,
   });
 }
 
@@ -796,13 +613,7 @@ class _ProjectCarouselTile extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            if (project.fallbackImage != null)
-              flutter.Image.asset(project.fallbackImage!, fit: BoxFit.cover)
-            else
-              SizedBox.expand(
-                child: HtmlElementView(viewType: project.viewType),
-              ),
-
+            flutter.Image.asset(project.image, fit: BoxFit.cover),
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
@@ -832,29 +643,28 @@ class _ProjectsList extends StatelessWidget {
       title: 'Mentora AI',
       description:
           'An AI-powered exam preparation mobile application with notes, quizzes, planners, and AI doubt solving.',
-      viewType: 'iframe-mentora',
+      image: 'assets/images/mentora.png',
       openUrl: 'https://www.mentoraaiapp.com/',
     ),
     _ProjectData(
       title: 'Aspyre',
       description:
           'A modern clothing brand focused on strong visual identity, storytelling, and e-commerce.',
-      viewType: 'iframe-aspyre',
-      fallbackImage: 'assets/images/aspyre_preview.png',
+      image: 'assets/images/aspyre_preview.png',
       openUrl: 'https://www.aspyre.co.in/',
     ),
     _ProjectData(
       title: 'Arzoo Makeovers',
       description:
           'A clean portfolio website showcasing professional makeup work and services.',
-      viewType: 'iframe-arzoo',
+      image: 'assets/images/arzoo.png',
       openUrl: 'https://arzoo-makeovers.vercel.app/',
     ),
     _ProjectData(
       title: 'YK Industries',
       description:
           'A corporate portfolio website for an industrial water pump manufacturer.',
-      viewType: 'iframe-yk',
+      image: 'assets/images/yk.png',
       openUrl: 'https://www.ykwaterpumps.in/',
     ),
   ];
@@ -897,7 +707,7 @@ class _ProjectsList extends StatelessWidget {
                   onPressed: project.openUrl == null
                       ? null
                       : () {
-                          html.window.open(project.openUrl!, '_blank');
+                          launchUrlString(project.openUrl);
                         },
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.white),
