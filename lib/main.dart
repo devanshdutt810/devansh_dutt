@@ -640,6 +640,13 @@ class _ProjectsList extends StatelessWidget {
 
   static const List<_ProjectData> projects = [
     _ProjectData(
+      title: 'Janta Electricals',
+      description:
+          'A Portfolio for Leading Manufacturers of industrial grade air coolers and spare parts in India.',
+      image: 'assets/images/janta.png',
+      openUrl: 'https://www.jantaelectricals.in/',
+    ),
+    _ProjectData(
       title: 'Mentora AI',
       description:
           'An AI-powered exam preparation mobile application with notes, quizzes, planners, and AI doubt solving.',
